@@ -25,6 +25,7 @@ public abstract class Critter {
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
+	private static List<Critter> Crit  = new java.util.ArrayList<Critter>();
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
@@ -40,8 +41,9 @@ public abstract class Critter {
 		rand = new java.util.Random(new_seed);
 	}
 	
-	
+	//
 	/* a one-character long string that visually depicts your critter in the ASCII interface */
+	@Override
 	public String toString() { return ""; }
 	
 	private int energy = 0;
@@ -74,6 +76,7 @@ public abstract class Critter {
 	 * @throws InvalidCritterException
 	 */
 	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
+		//Critter critter_class_name = new Critter;
 	}
 	
 	/**
@@ -168,7 +171,8 @@ public abstract class Critter {
 	 * Clear the world of all critters, dead and alive
 	 */
 	public static void clearWorld() {
-		// Complete this method.
+		population.clear();
+		babies.clear();
 	}
 	
 	public static void worldTimeStep() {
