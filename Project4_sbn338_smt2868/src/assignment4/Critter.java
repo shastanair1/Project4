@@ -14,6 +14,7 @@ package assignment4;
 
 
 import java.util.List;
+import java.lang.*;
 
 /* see the PDF for descriptions of the methods and fields in this class
  * you may add fields, methods or inner classes to Critter ONLY if you make your additions private
@@ -25,7 +26,7 @@ public abstract class Critter {
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
-	private static List<Critter> Crit  = new java.util.ArrayList<Critter>();
+	private static List<Critter> crit  = new java.util.ArrayList<Critter>();
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
@@ -53,10 +54,89 @@ public abstract class Critter {
 	private int y_coord;
 	
 	protected final void walk(int direction) {
+		//a. Params.walk_energy_cost;
+		//a.energy--;
+		energy-=Params.walk_energy_cost;
+		//is each block just one?
+		//how energy drain
+		switch (direction) {
+		case (0):
+			x_coord++;
+			break;
+		case (1):
+			x_coord++;
+			y_coord++;
+			break;
+		case (2):
+			y_coord++;
+			break;
+		case (3):
+			x_coord--;
+			y_coord++;
+			break;
+		case (4):
+			x_coord--;
+			break;
+		case (5):
+			x_coord--;
+			y_coord--;
+			break;
+		case (6):
+			y_coord--;
+			break;
+		case (7):
+			x_coord++;
+			y_coord--;
+			break;
+		}
+		if (x_coord < 0) {
+			x_coord = Params.world_width + x_coord;
+		}
+		if (y_coord < 0) {
+			y_coord -= Params.world_height;
+		}
 	}
 	
 	protected final void run(int direction) {
-		
+		energy-=Params.run_energy_cost;
+		for(int i=0; i<2; i++){
+			switch (direction) {
+			case (0):
+				x_coord++;
+				break;
+			case (1):
+				x_coord++;
+				y_coord++;
+				break;
+			case (2):
+				y_coord++;
+				break;
+			case (3):
+				x_coord--;
+				y_coord++;
+				break;
+			case (4):
+				x_coord--;
+				break;
+			case (5):
+				x_coord--;
+				y_coord--;
+				break;
+			case (6):
+				y_coord--;
+				break;
+			case (7):
+				x_coord++;
+				y_coord--;
+				break;
+			}
+			if (x_coord < 0) {
+				x_coord = Params.world_width + x_coord;
+			}
+			if (y_coord < 0) {
+				y_coord -= Params.world_height;
+			}
+		}
 	}
 	
 	protected final void reproduce(Critter offspring, int direction) {
@@ -77,6 +157,21 @@ public abstract class Critter {
 	 */
 	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
 		//Critter critter_class_name = new Critter;
+	//	Critter subclass= Critter.newInstance();
+	//	crit.add(subclass);
+		Critter a = null;//**********************************what to initialize it with
+		a.x_coord= getRandomInt(Params.world_width);
+		a.y_coord = getRandomInt(Params.world_height);
+		a.energy= Params.start_energy;
+		crit.add(a);
+		try { 
+            Class crit   = Class.forName(critter_class_name); //******************
+            
+        } catch (ClassNotFoundException e) {
+        	InvalidCritterException e1 = new InvalidCritterException(critter_class_name);
+        	throw e1;
+        }
+		//what to initialize it to, how to throw the exception
 	}
 	
 	/**
@@ -173,6 +268,7 @@ public abstract class Critter {
 	public static void clearWorld() {
 		population.clear();
 		babies.clear();
+		crit.clear();
 	}
 	
 	public static void worldTimeStep() {
