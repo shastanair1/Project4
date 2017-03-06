@@ -172,7 +172,7 @@ public abstract class Critter {
         	throw e1;
         }
 		//what to initialize it to, how to throw the exception
-	}
+	} 
 	
 	/**
 	 * Gets a list of critters of a specific type.
