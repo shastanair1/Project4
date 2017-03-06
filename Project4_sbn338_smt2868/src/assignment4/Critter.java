@@ -129,7 +129,7 @@ public abstract class Critter {
 				x_coord++;
 				y_coord--;
 				break;
-			}  
+			}   
 			if (x_coord < 0) {
 				x_coord = Params.world_width + x_coord;
 			}
