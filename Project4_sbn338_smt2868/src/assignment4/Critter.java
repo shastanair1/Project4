@@ -95,6 +95,7 @@ public abstract class Critter {
 		if (y_coord < 0) {
 			y_coord -= Params.world_height;
 		}
+		//check for other directions
 	}
 	
 	protected final void run(int direction) {
@@ -136,6 +137,7 @@ public abstract class Critter {
 			if (y_coord < 0) {
 				y_coord -= Params.world_height;
 			}
+			//check for other directions
 		}
 	}
 	
