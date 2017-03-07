@@ -13,6 +13,8 @@ package assignment4;
  */
 
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.lang.*;
 
@@ -278,6 +280,120 @@ public abstract class Critter {
 	}
 	
 	public static void displayWorld() {
-		// Complete this method.
+		System.out.print("+");
+		int[] x_coord = new int[population.size()];
+		int[] y_coord = new int[population.size()];
+		
+		int grid_x = 0;
+		int grid_y = 0;
+		Iterator<Critter> iterate = population.iterator();
+		
+		for(int i = 0; i < population.size(); i++){
+			while(iterate.hasNext()){
+				x_coord[i] = iterate.next().x_coord;
+				y_coord[i] = iterate.next().y_coord;
+			}
+		}
+		
+		
+		for(int i = 0; i < Params.world_width-1; i++){
+			System.out.print("-");
+		}
+		System.out.print("+");
+		for(int i = 0; i < Params.world_height-1; i++){
+			System.out.print("|");
+			grid_y++;
+			grid_x = 0;
+			//Make a critter and algae location array
+			for(int j = 1; j < Params.world_width-1; j++){
+				for(int k = 0; k < population.size(); k++){
+					if(x_coord[k] == grid_x && y_coord[k]== grid_y){
+						System.out.print("C");
+					}
+					else{
+						System.out.print(" ");
+					}
+				}
+				grid_x++;
+			}
+			System.out.print("+");
+		}
+		
+	}
+	//THis function will go through the total list of critters and determine whether or not there are any in the smae position
+	private static void Encounter(){
+		Critter currentCritter = null;
+		Critter checkCritter = null;
+		ArrayList<ArrayList<Critter>> CritterList = new ArrayList<ArrayList<Critter>>();
+		//ArrayList<Critter> sameLocation = new ArrayList<Critter>();
+		//Iterator<Critter> iterate = sameLocation.iterator();
+		for(int i = 0; i < population.size(); i++){
+			ArrayList<Critter> sameLocation = new ArrayList<Critter>();
+			Iterator<Critter> iterate = population.iterator();
+			//this puts us in the right position
+			for(int j  = 0; j< i; j++){
+				if(iterate.hasNext()){
+					iterate.next();
+				}
+			}
+			if(iterate.hasNext()){
+				currentCritter = iterate.next();
+				sameLocation.add(currentCritter);
+				for(int j = i; j < population.size(); j++){
+					//
+					//If we were going ot add the babie to the population before this, we can write the code write here, but i think
+					//thats whythey have a list dedicated to babies
+					//
+					checkCritter = iterate.next();
+					if(checkCritter.x_coord == currentCritter.x_coord && checkCritter.y_coord == currentCritter.y_coord){
+						sameLocation.add(checkCritter);
+					}
+				}
+			}
+			//Add the completed list to the list of all coordinate areas
+			if(sameLocation.size() > 1){
+				CritterList.add(sameLocation);
+			}
+		}
+		
+		
+		//THis part will take all the lists and implelment the fight sequences for all
+		Iterator<ArrayList<Critter>> critterIterate = CritterList.iterator();
+		for(int i = 0; i < CritterList.size(); i++){
+			ArrayList<Critter> sameLocation2 = new ArrayList<Critter>();
+			if(critterIterate.hasNext()){
+				sameLocation2 = critterIterate.next();
+			}
+			//ask Shasta to send me the Critter that one the fight, or we can define a global variable
+			Iterator<Critter> iterate = sameLocation2.iterator();
+			while(iterate.hasNext()){
+				//Iterator<Critter> iterate = population.iterator();
+				if(iterate.hasNext()){
+					currentCritter = iterate.next();
+				}
+				for(int k = (1); k < sameLocation2.size(); k++){
+					boolean winner = true;
+					if(iterate.hasNext()){
+						checkCritter = iterate.next();
+					}
+					winner = currentCritter.fight(checkCritter.toString());
+					if(winner == true){
+						iterate = sameLocation2.iterator();
+						sameLocation2.remove(checkCritter);
+						if(iterate.hasNext()){
+							currentCritter = iterate.next();
+						}
+					}else{
+						iterate = sameLocation2.iterator();
+						sameLocation2.remove(currentCritter);
+						if(iterate.hasNext()){
+							currentCritter = iterate.next();
+						}
+					}
+				}
+			}
+			
+			
+		}
 	}
 }
