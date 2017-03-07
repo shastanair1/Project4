@@ -95,7 +95,13 @@ public abstract class Critter {
 			x_coord = Params.world_width + x_coord;
 		}
 		if (y_coord < 0) {
-			y_coord -= Params.world_height;
+			y_coord = Params.world_height +y_coord;
+		}
+		if(x_coord>Params.world_width){
+			x_coord=x_coord-Params.world_width;
+		}
+		if(y_coord>Params.world_height){
+			y_coord=y_coord-Params.world_height;
 		}
 		//check for other directions
 	}
@@ -137,9 +143,14 @@ public abstract class Critter {
 				x_coord = Params.world_width + x_coord;
 			}
 			if (y_coord < 0) {
-				y_coord -= Params.world_height;
+				y_coord = Params.world_height +y_coord;
 			}
-			//check for other directions
+			if(x_coord>Params.world_width){
+				x_coord=x_coord-Params.world_width;
+			}
+			if(y_coord>Params.world_height){
+				y_coord=y_coord-Params.world_height;
+			}
 		}
 	}
 	
@@ -163,7 +174,30 @@ public abstract class Critter {
 		//Critter critter_class_name = new Critter;
 	//	Critter subclass= Critter.newInstance();
 	//	crit.add(subclass);
-		Critter a = null;//**********************************what to initialize it with
+		Critter a;
+		switch(critter_class_name){
+		case("c"):
+			a=new Craig();
+			break;
+		case("@"):
+			a= new Algae();
+			break;
+		case("1"):
+			a=new MyCritter1();
+			break;
+		case("2"):
+			a=new MyCritter2();
+			break;
+		case("6"):
+			a=new MyCritter6();
+			break;
+		case("7"):
+			a= new MyCritter7();
+			break;
+		default:
+			a=null;
+		}
+		//Critter a = null;//**********************************what to initialize it with
 		a.x_coord= getRandomInt(Params.world_width);
 		a.y_coord = getRandomInt(Params.world_height);
 		a.energy= Params.start_energy;
@@ -277,6 +311,16 @@ public abstract class Critter {
 	
 	public static void worldTimeStep() {
 		// Complete this method.
+		// List<Critter> Crits = getInstances("Craig");
+		List<Critter> Crits = population;
+		Critter currentCritter;
+		Iterator<Critter> iterate = population.iterator();
+		for (int i = 0; i < population.size(); i++) {
+			while (iterate.hasNext()) {
+				currentCritter = iterate.next();
+				currentCritter.doTimeStep();
+			}
+		}
 	}
 	
 	public static void displayWorld() {
@@ -392,7 +436,6 @@ public abstract class Critter {
 					}
 				}
 			}
-			
 			
 		}
 	}
