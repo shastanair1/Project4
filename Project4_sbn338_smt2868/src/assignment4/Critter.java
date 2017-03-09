@@ -174,7 +174,7 @@ public abstract class Critter {
 		//Critter critter_class_name = new Critter;
 	//	Critter subclass= Critter.newInstance();
 	//	crit.add(subclass);
-		Critter a;
+		Critter a; 
 		switch(critter_class_name){
 		case("c"):
 			a=new Craig();
@@ -312,7 +312,7 @@ public abstract class Critter {
 	public static void worldTimeStep() {
 		// Complete this method.
 		// List<Critter> Crits = getInstances("Craig");
-		List<Critter> Crits = population;
+		List<Critter> Crits = population;//???????????????????????????????????????????????
 		Critter currentCritter;
 		Iterator<Critter> iterate = population.iterator();
 		for (int i = 0; i < population.size(); i++) {

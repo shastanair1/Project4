@@ -6,8 +6,17 @@ public class MyCritter1 extends Critter.TestCritter {
 
 	@Override
 	public void doTimeStep() {
-		walk(0);
-		//check to
+		int a= this.getEnergy();
+		if(a>Params.run_energy_cost){
+			this.run(1);
+		}
+		else if(a>Params.walk_energy_cost){
+			this.walk(1);
+		}
+		else{
+			this.setEnergy(0);
+		}
+		
 	}
 
 	@Override
