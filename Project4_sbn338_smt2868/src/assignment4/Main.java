@@ -12,9 +12,11 @@ package assignment4;
  * Fall 2016
  */
 
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 import java.io.*;
-
 
 
 /*
@@ -66,15 +68,155 @@ public class Main {
             }
         } else { // if no arguments to main
             kb = new Scanner(System.in); // use keyboard and console
+            
         }
 
         /* Do not alter the code above for your submission. */
         /* Write your code below. */
+        int value = 0;
+        int flag = 0;
+        
+        while (flag == 0){
+        	value  = Controller(kb);
+        	//this is quit
+        	if (value == 1){
+        		flag = 1;
+        	}
+        	//this is show
+        	else if (value == 0){
+        		flag = 0;
+        	}else {
+        		flag = 0;
+        		System.out.println("error processing: " + kb);
+        	}
+        
+     
+        }
         
         // System.out.println("GLHF");
         
+        
+        
         /* Write your code above */
+        
         System.out.flush();
 
+    }
+    
+    private static int Controller(Scanner kb){
+    	System.out.println("critters>");
+    	//String user_input = kb.next();
+    	
+    	int flag = 0;
+    	int value = 0;
+    	while (flag == 0){
+    		String user_input = kb.next();
+    		String total = user_input;
+    		flag = 1;
+    	if (user_input.equals("quit")){
+    		return(1);
+    	}else if (user_input.equals("show")){
+    		Critter.displayWorld();
+    		return(0);
+    	}else if (user_input.contains("step")){
+    		if(kb.hasNextInt()){
+    			try{
+    				value = kb.nextInt();
+    				total = total + " " +String.valueOf(value);
+    				for(int i = 0; i < value; i++){
+    					Critter.worldTimeStep();
+    					
+    				}
+    			//return (value);
+    				return(0);
+    			}
+    			catch(InputMismatchException e){
+    				flag = 0;
+    				System.out.println("error processing: " + total);
+    			}
+    		}else{
+    			Critter.worldTimeStep();
+    		}
+    	}else if (user_input.equals("seed")){
+    		int name;
+    		if(kb.hasNext()){
+    			
+    			name = kb.nextInt();
+    			total = total + " " +String.valueOf(name);
+    			try{
+    				Critter.setSeed(name);
+    			}
+    			catch(InputMismatchException e){
+    				flag = 0;
+    				System.out.println("error processing: " + total);
+    			}
+    		}
+    		
+    		return(0);	
+    	}
+    	else if (user_input.equals("stats")){
+    		String name;
+    		if(kb.hasNext()){
+    			name = kb.next();
+    			total = total + " " +String.valueOf(name);
+    			List<Critter> crittor = new ArrayList<Critter>();
+    			try {
+					crittor = Critter.getInstances(name);
+					Critter.runStats(crittor);
+				} catch (InvalidCritterException e) {
+					// TODO Auto-generated catch block
+					flag = 0;
+					System.out.println("error processing: " + kb);
+				}
+    		}
+    		return 0;
+    	}
+    	else if (user_input.equals("make")){
+    		String class_name;
+    		if(kb.hasNext() && !(kb.hasNextInt())){
+    			class_name = kb.next();
+    			total = total + class_name;
+    		if(kb.hasNextInt()){
+    			try{
+    				value = kb.nextInt();
+    				total = total + " " + String.valueOf(value);
+    				for(int i = 0; i < value; i++){
+    					try {
+							Critter new_Critter = Critter.makeCritter(class_name);
+							
+							
+						} catch (InvalidCritterException e) {
+							// TODO Auto-generated catch block
+							flag = 0;
+							System.out.println("error processing: " + total);
+						}
+    				}
+    				
+    				return(0);
+    			}
+    			catch(InputMismatchException e){
+    				flag = 0;
+    				System.out.println("error processing: " + total);
+    			}
+    		}else{
+    			try {
+					Critter.makeCritter(class_name);
+				} catch (InvalidCritterException e) {
+					// TODO Auto-generated catch block
+					flag = 0;
+					System.out.println("error processing: " + total);
+				}
+    		}
+    		}
+    	}
+    	
+    	else {
+    		flag = 0;
+    		kb.nextLine();
+    		System.out.println("error processing: " + total);
+    	}
+    	
+    	}
+    	return 0;
     }
 }

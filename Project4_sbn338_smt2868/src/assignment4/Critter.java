@@ -38,6 +38,9 @@ public abstract class Critter {
 	static {
 		myPackage = Critter.class.getPackage().toString().split(" ")[1];
 	}
+	private boolean get_walked(){
+		return hasWalked;
+	}
 	
 	private static java.util.Random rand = new java.util.Random();
 	public static int getRandomInt(int max) {
@@ -53,7 +56,7 @@ public abstract class Critter {
 	@Override
 	public String toString() { return ""; }
 	
-	private int energy = 0;
+	private int energy = Params.start_energy;
 	protected int getEnergy() { return energy; }
 	
 	private boolean walk_flag = false;
@@ -165,10 +168,13 @@ public abstract class Critter {
 		if(offspring.energy >= Params.min_reproduce_energy){
 			
 			try {
-				Critter newCrit = makeCritter(offspring.toString());
-				if(newCrit != null && newCrit.equals(population.get(population.size() - 1))){
-					population.remove(population.size() - 1);          //Removes the impicit addition to the makeCritteer
-					babies.add(newCrit);
+				Class value = offspring.getClass();
+				String name = value.getName();
+				name = name.replace(Critter.myPackage + ".", "");
+				Critter newCrit = makeCritter_reproduce(name);
+				if(newCrit != null){
+					//population.remove(population.size() - 1);          //Removes the impicit addition to the makeCritteer
+					//babies.add(newCrit);
 					
 				newCrit.energy =  offspring.energy / 2;
 				offspring.energy = (int) Math.ceil((offspring.energy / 2));
@@ -287,6 +293,62 @@ public abstract class Critter {
 			}	// Create new object using constructor
 			Critter me = (Critter)instanceOfMyCritter;
 			population.add(me);
+			me.energy = Params.start_energy;
+			me.x_coord = Critter.getRandomInt((Params.world_width ));
+			me.y_coord = Critter.getRandomInt((Params.world_height));
+			return me;
+		//return null;
+	}
+	
+	private static Critter makeCritter_reproduce(String critter_class_name) throws InvalidCritterException {
+		Critter a;
+		critter_class_name = myPackage + "." + critter_class_name;
+		/*String value = myPackage + "." + critter_class_name;
+		String name = "0";
+		try {
+			Class<?> d_critter = Class.forName(critter_class_name);
+			Class<?> b_critter = Class.forName(critter_class_name);
+			
+			//Class<Critter> c = b_critter.getCl;*/
+		
+		Class<?> myCritter = null;
+		Constructor<?> constructor = null;
+		Object instanceOfMyCritter = null;
+
+		try {
+			myCritter = Class.forName(critter_class_name); 	// Class object of specified name
+		} catch (ClassNotFoundException e) {
+			throw new InvalidCritterException(critter_class_name);
+		}
+			try {
+				constructor = myCritter.getConstructor();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		// No-parameter constructor object
+			try {
+				instanceOfMyCritter = constructor.newInstance();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	// Create new object using constructor
+			Critter me = (Critter)instanceOfMyCritter;
+			//population.add(me);
+			me.energy = Params.start_energy;
+			me.x_coord = Critter.getRandomInt(Params.world_width);
+			me.y_coord = Critter.getRandomInt(Params.world_height);
 			return me;
 		//return null;
 	}
@@ -306,7 +368,7 @@ public abstract class Critter {
 		//add all instances of the given class to the list
 		for(Critter c : Critter.population){
 			if (classType.isInstance(c))
-		          result.add(c);
+		          result.add(c); 
 		     }
 		
 	 return result;
@@ -407,26 +469,29 @@ public abstract class Critter {
 		Critter currentCritter;
 		Iterator<Critter> iterate = population.iterator();
 		clear_hasWalked();
-		for(int i = 0; i<population.size(); i++){
+		//for(int i = 0; i<population.size(); i++){
 			while(iterate.hasNext()){
 				currentCritter = iterate.next();
 				
+				//currentCritter.reproduce(currentCritter, 1);
 				currentCritter.doTimeStep();
+				currentCritter.hasWalked = true;
 			}
 			
-		}
+		//}
 		remove_Dead();
 		Encounter();
+		remove_Dead();
 		for(int i = 0; i < Params.refresh_algae_count; i++){
 			try {
-				Critter.makeCritter("@");
+				Critter.makeCritter("Algae");
 			} catch (InvalidCritterException e) {
 				// TODO Auto-generated catch block
 				System.out.println("Invalid Critter");
 			}
 		}
 		
-		
+		population.addAll(babies);
 		// Complete this method.
 	}
 	private static void clear_hasWalked(){
@@ -457,40 +522,53 @@ public abstract class Critter {
 		int[] y_coord = new int[population.size()];
 		
 		int grid_x = 0;
-		int grid_y = 0;
+		int grid_y = -1;
 		Iterator<Critter> iterate = population.iterator();
 		
-		for(int i = 0; i < population.size(); i++){
+		//for(int i = 0; i < population.size(); i++){
+		int l = 0;
 			while(iterate.hasNext()){
-				x_coord[i] = iterate.next().x_coord;
-				y_coord[i] = iterate.next().y_coord;
+				if(l < population.size()){
+					l++;
+				}
+				x_coord[l] = iterate.next().x_coord;
+				y_coord[l] = iterate.next().y_coord;
 			}
-		}
+		//}
 		
 		
-		for(int i = 0; i < Params.world_width-1; i++){
+		for(int i = 0; i < Params.world_width; i++){
 			System.out.print("-");
 		}
-		System.out.print("+");
-		for(int i = 0; i < Params.world_height-1; i++){
+		System.out.println("+");
+		for(int i = 0; i < Params.world_height; i++){
 			System.out.print("|");
+			int space_flag = 0;
 			grid_y++;
 			grid_x = 0;
 			//Make a critter and algae location array
-			for(int j = 1; j < Params.world_width-1; j++){
+			for(int j = 0; j < Params.world_width; j++){
 				for(int k = 0; k < population.size(); k++){
 					if(x_coord[k] == grid_x && y_coord[k]== grid_y){
 						System.out.print(population.get(k).toString());
-					}
-					else{
-						System.out.print(" ");
+						space_flag = 1;
+						break;
 					}
 				}
+				if(space_flag != 1){
+					System.out.print(" ");
+				}
+				space_flag  = 0; 
+					
 				grid_x++;
 			}
-			System.out.print("+");
+			System.out.println("|");
 		}
-		
+		System.out.print("+");
+		for(int i = 0; i < Params.world_width; i++){
+			System.out.print("-");
+		}
+		System.out.println("+");
 	}
 	//THis function will go through the total list of critters and determine whether or not there are any in the smae position
 	private static void Encounter(){
@@ -518,7 +596,8 @@ public abstract class Critter {
 					value_x.add(currentCritter.x_coord);
 					value_y.add(currentCritter.y_coord);
 				sameLocation.add(currentCritter);
-				for(int j = i; j < population.size(); j++){
+				//for(int j = i; j < population.size(); j++){
+				while(iterate.hasNext()){
 					//
 					//If we were going ot add the babie to the population before this, we can write the code write here, but i think
 					//thats whythey have a list dedicated to babies
@@ -547,30 +626,76 @@ public abstract class Critter {
 			}
 			//ask Shasta to send me the Critter that wins the fight, or we can define a global variable
 			Iterator<Critter> iterate = sameLocation2.iterator();
-			while(iterate.hasNext()){
+			if(iterate.hasNext()){
+				currentCritter = iterate.next();
+			}
+			//while(iterate.hasNext()){
 				//Iterator<Critter> iterate = population.iterator();
+				//for(int k = (1); k < sameLocation2.size(); k++){
+			while(sameLocation2.size() > 1){
+				if (sameLocation2.size() == 1){
+					System.out.print("Critical failure");
+				}
+				iterate = sameLocation2.iterator();
 				if(iterate.hasNext()){
 					currentCritter = iterate.next();
 				}
-				for(int k = (1); k < sameLocation2.size(); k++){
+				
 					boolean winner = true;
+					boolean winner2 = true;
+					int valueCurrent = 0;
+					int valueChecked = 0;
+							
 					if(iterate.hasNext()){
 						checkCritter = iterate.next();
 					}
-					winner = currentCritter.fight(checkCritter.toString());
-					if(winner == true){
-						iterate = sameLocation2.iterator();
+					if(currentCritter.hasWalked == true){
+						//winner = currentCritter.fight(checkCritter.toString());
+						valueCurrent = Critter.getRandomInt(1000);
+					}else{
+						winner = currentCritter.fight(checkCritter.toString());
+						if(winner == true){
+							valueCurrent = Critter.getRandomInt(1000);
+						}
+					}
+					if(checkCritter.hasWalked == true){
+						valueChecked = Critter.getRandomInt(1000);
+					}
+					else{
+						winner = checkCritter.fight(currentCritter.toString());
+						if(winner == true){
+							valueChecked = Critter.getRandomInt(1000);
+						}
+					}
+					if(valueCurrent > valueChecked){
+						currentCritter.energy = currentCritter.energy + checkCritter.energy / 2;
+						if (sameLocation2.size() == 1){
+							System.out.print("Critical failure");
+						}
 						sameLocation2.remove(checkCritter);
+						checkCritter.energy = 0;
+						iterate = sameLocation2.iterator();
 						if(iterate.hasNext()){
 							currentCritter = iterate.next();
 						}
-					}else{
-						iterate = sameLocation2.iterator();
+					}else if(valueCurrent < valueChecked){
+						//remove the current critter
+						if (sameLocation2.size() == 1){
+							System.out.print("Critical failure");
+						}
+						sameLocation2.remove(currentCritter);
+						checkCritter.energy = checkCritter.energy + currentCritter.energy / 2;
+						currentCritter.energy = 0;
+						currentCritter = checkCritter;
+						
+						
+						//remove the current critter
+						/*iterate = sameLocation2.iterator();
 						sameLocation2.remove(currentCritter);
 						if(iterate.hasNext()){
 							currentCritter = iterate.next();
-						}
-					}
+						}*/
+			//		}
 				}
 			}
 			

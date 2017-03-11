@@ -16,7 +16,7 @@ public class MyCritter2 extends TestCritter {
 	@Override
 	public void doTimeStep() {
 		
-		if (getEnergy() > 150) {
+		/*if (getEnergy() > 150) {
 			MyCritter2 child = new MyCritter2();
 			for (int k = 0; k < 8; k += 1) {
 				child.genes[k] = this.genes[k];
@@ -31,7 +31,7 @@ public class MyCritter2 extends TestCritter {
 			reproduce(child, Critter.getRandomInt(8));
 		}
 		
-		/* pick a new direction based on our genes */
+		/* pick a new direction based on our genes 
 		int roll = Critter.getRandomInt(GENE_TOTAL);
 		int turn = 0;
 		while (genes[turn] <= roll) {
@@ -41,7 +41,7 @@ public class MyCritter2 extends TestCritter {
 		assert(turn < 8);
 		
 		dir = (dir + turn) % 8;
-		
+		*/
 		int a= this.getEnergy();
 		if(a>Params.run_energy_cost){
 			this.run(2);
