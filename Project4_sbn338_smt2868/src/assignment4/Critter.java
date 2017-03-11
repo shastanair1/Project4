@@ -13,10 +13,13 @@ package assignment4;
  */
 
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.lang.*;
+import java.util.Set;
 
 /* see the PDF for descriptions of the methods and fields in this class
  * you may add fields, methods or inner classes to Critter ONLY if you make your additions private
@@ -29,6 +32,7 @@ public abstract class Critter {
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
 	private static List<Critter> crit  = new java.util.ArrayList<Critter>();
+	private boolean hasWalked = false;
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
 	static {
@@ -52,6 +56,7 @@ public abstract class Critter {
 	private int energy = 0;
 	protected int getEnergy() { return energy; }
 	
+	private boolean walk_flag = false;
 	private int x_coord;
 	private int y_coord;
 	
@@ -61,6 +66,7 @@ public abstract class Critter {
 		energy-=Params.walk_energy_cost;
 		//is each block just one?
 		//how energy drain
+		walk_flag = true;
 		switch (direction) {
 		case (0):
 			x_coord++;
@@ -155,6 +161,70 @@ public abstract class Critter {
 	}
 	
 	protected final void reproduce(Critter offspring, int direction) {
+		
+		if(offspring.energy >= Params.min_reproduce_energy){
+			
+			try {
+				Critter newCrit = makeCritter(offspring.toString());
+				if(newCrit != null && newCrit.equals(population.get(population.size() - 1))){
+					population.remove(population.size() - 1);          //Removes the impicit addition to the makeCritteer
+					babies.add(newCrit);
+					
+				newCrit.energy =  offspring.energy / 2;
+				offspring.energy = (int) Math.ceil((offspring.energy / 2));
+				switch (direction) {
+				case (0):
+					newCrit.x_coord++;
+					break;
+				case (1):
+					newCrit.x_coord++;
+				newCrit.y_coord++;
+					break;
+				case (2):
+					newCrit.y_coord++;
+					break;
+				case (3):
+					newCrit.x_coord--;
+				newCrit.y_coord++;
+					break;
+				case (4):
+					newCrit.x_coord--;
+					break;
+				case (5):
+					newCrit.x_coord--;
+				newCrit.y_coord--;
+					break;
+				case (6):
+					newCrit.y_coord--;
+					break;
+				case (7):
+					newCrit.x_coord++;
+				newCrit.y_coord--;
+					break;
+				}   
+				if (x_coord < 0) {
+					x_coord = Params.world_width + x_coord;
+				}
+				if (y_coord < 0) {
+					y_coord = Params.world_height +y_coord;
+				}
+				if(x_coord>Params.world_width){
+					x_coord=x_coord-Params.world_width;
+				}
+				if(y_coord>Params.world_height){
+					y_coord=y_coord-Params.world_height;
+				}
+				
+				babies.add(newCrit);
+				}
+			} catch (InvalidCritterException e) {
+			// TODO Auto-generated catch block
+				System.out.println("error processing: ");
+			}
+		}
+		
+		
+		
 	}
 
 	public abstract void doTimeStep();
@@ -168,49 +238,59 @@ public abstract class Critter {
 	 * upper. For example, if craig is supplied instead of Craig, an error is thrown instead of
 	 * an Exception.)
 	 * @param critter_class_name
+	 * @return 
 	 * @throws InvalidCritterException
 	 */
-	public static void makeCritter(String critter_class_name) throws InvalidCritterException {
-		//Critter critter_class_name = new Critter;
-	//	Critter subclass= Critter.newInstance();
-	//	crit.add(subclass);
-		Critter a; 
-		switch(critter_class_name){
-		case("c"):
-			a=new Craig();
-			break;
-		case("@"):
-			a= new Algae();
-			break;
-		case("1"):
-			a=new MyCritter1();
-			break;
-		case("2"):
-			a=new MyCritter2();
-			break;
-		case("6"):
-			a=new MyCritter6();
-			break;
-		case("7"):
-			a= new MyCritter7();
-			break;
-		default:
-			a=null;
+	public static Critter makeCritter(String critter_class_name) throws InvalidCritterException {
+		Critter a;
+		critter_class_name = myPackage + "." + critter_class_name;
+		/*String value = myPackage + "." + critter_class_name;
+		String name = "0";
+		try {
+			Class<?> d_critter = Class.forName(critter_class_name);
+			Class<?> b_critter = Class.forName(critter_class_name);
+			
+			//Class<Critter> c = b_critter.getCl;*/
+		
+		Class<?> myCritter = null;
+		Constructor<?> constructor = null;
+		Object instanceOfMyCritter = null;
+
+		try {
+			myCritter = Class.forName(critter_class_name); 	// Class object of specified name
+		} catch (ClassNotFoundException e) {
+			throw new InvalidCritterException(critter_class_name);
 		}
-		//Critter a = null;//**********************************what to initialize it with
-		a.x_coord= getRandomInt(Params.world_width);
-		a.y_coord = getRandomInt(Params.world_height);
-		a.energy= Params.start_energy;
-		crit.add(a);
-		try { 
-            Class crit   = Class.forName(critter_class_name); //******************
-            
-        } catch (ClassNotFoundException e) {
-        	InvalidCritterException e1 = new InvalidCritterException(critter_class_name);
-        	throw e1;
-        }
-		//what to initialize it to, how to throw the exception
-	} 
+			try {
+				constructor = myCritter.getConstructor();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		// No-parameter constructor object
+			try {
+				instanceOfMyCritter = constructor.newInstance();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	// Create new object using constructor
+			Critter me = (Critter)instanceOfMyCritter;
+			population.add(me);
+			return me;
+		//return null;
+	}
+	
 	
 	/**
 	 * Gets a list of critters of a specific type.
@@ -219,9 +299,22 @@ public abstract class Critter {
 	 * @throws InvalidCritterException
 	 */
 	public static List<Critter> getInstances(String critter_class_name) throws InvalidCritterException {
+		try{
 		List<Critter> result = new java.util.ArrayList<Critter>();
-	
-		return result;
+		Class<?> critterType = Class.forName(critter_class_name);
+		Class classType = critterType.getClass();
+		//add all instances of the given class to the list
+		for(Critter c : Critter.population){
+			if (classType.isInstance(c))
+		          result.add(c);
+		     }
+		
+	 return result;
+		}
+		catch (ClassNotFoundException e) {
+			throw new InvalidCritterException(critter_class_name);
+		}
+		//return result;
 	}
 	
 	/**
@@ -306,19 +399,54 @@ public abstract class Critter {
 	public static void clearWorld() {
 		population.clear();
 		babies.clear();
-		crit.clear();
 	}
 	
 	public static void worldTimeStep() {
-		// Complete this method.
-		// List<Critter> Crits = getInstances("Craig");
-		List<Critter> Crits = population;//???????????????????????????????????????????????
+		//List<Critter> Crits = getInstances("Craig");
+		List<Critter> Crits = population;
 		Critter currentCritter;
 		Iterator<Critter> iterate = population.iterator();
-		for (int i = 0; i < population.size(); i++) {
-			while (iterate.hasNext()) {
+		clear_hasWalked();
+		for(int i = 0; i<population.size(); i++){
+			while(iterate.hasNext()){
 				currentCritter = iterate.next();
+				
 				currentCritter.doTimeStep();
+			}
+			
+		}
+		remove_Dead();
+		Encounter();
+		for(int i = 0; i < Params.refresh_algae_count; i++){
+			try {
+				Critter.makeCritter("@");
+			} catch (InvalidCritterException e) {
+				// TODO Auto-generated catch block
+				System.out.println("Invalid Critter");
+			}
+		}
+		
+		
+		// Complete this method.
+	}
+	private static void clear_hasWalked(){
+		Critter myCritter;
+		for(int i = 0; i < population.size() - 1; i++){
+			myCritter = population.get(i);
+			myCritter.hasWalked = false;
+		}
+	}
+	
+	private int CheckCritter(Critter a1, Critter a2){
+		//a1.fight(a2.toString)
+		
+		return 0;
+		
+	}
+	private static void remove_Dead(){
+		for(int i = 0; i > population.size(); i++){
+			if(population.get(i).energy <= 0){
+				population.remove(i);
 			}
 		}
 	}
@@ -352,7 +480,7 @@ public abstract class Critter {
 			for(int j = 1; j < Params.world_width-1; j++){
 				for(int k = 0; k < population.size(); k++){
 					if(x_coord[k] == grid_x && y_coord[k]== grid_y){
-						System.out.print("C");
+						System.out.print(population.get(k).toString());
 					}
 					else{
 						System.out.print(" ");
@@ -369,6 +497,8 @@ public abstract class Critter {
 		Critter currentCritter = null;
 		Critter checkCritter = null;
 		ArrayList<ArrayList<Critter>> CritterList = new ArrayList<ArrayList<Critter>>();
+		Set<Integer> value_x = new HashSet<Integer>();
+		Set<Integer> value_y = new HashSet<Integer>();
 		//ArrayList<Critter> sameLocation = new ArrayList<Critter>();
 		//Iterator<Critter> iterate = sameLocation.iterator();
 		for(int i = 0; i < population.size(); i++){
@@ -380,8 +510,13 @@ public abstract class Critter {
 					iterate.next();
 				}
 			}
-			if(iterate.hasNext()){
+			while(iterate.hasNext()){
 				currentCritter = iterate.next();
+				if(value_x.contains(currentCritter.x_coord) && value_y.contains(currentCritter.y_coord)){
+					
+				}else{
+					value_x.add(currentCritter.x_coord);
+					value_y.add(currentCritter.y_coord);
 				sameLocation.add(currentCritter);
 				for(int j = i; j < population.size(); j++){
 					//
@@ -391,7 +526,9 @@ public abstract class Critter {
 					checkCritter = iterate.next();
 					if(checkCritter.x_coord == currentCritter.x_coord && checkCritter.y_coord == currentCritter.y_coord){
 						sameLocation.add(checkCritter);
+						//Adda  set.contains fucntion to the parameters to check that some set doesn not contain x, y location
 					}
+				}
 				}
 			}
 			//Add the completed list to the list of all coordinate areas
@@ -408,7 +545,7 @@ public abstract class Critter {
 			if(critterIterate.hasNext()){
 				sameLocation2 = critterIterate.next();
 			}
-			//ask Shasta to send me the Critter that one the fight, or we can define a global variable
+			//ask Shasta to send me the Critter that wins the fight, or we can define a global variable
 			Iterator<Critter> iterate = sameLocation2.iterator();
 			while(iterate.hasNext()){
 				//Iterator<Critter> iterate = population.iterator();
@@ -436,6 +573,7 @@ public abstract class Critter {
 					}
 				}
 			}
+			
 			
 		}
 	}
